@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторні работи</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f7fa;
+            --accent-color: #50e3c2;
+            --text-color: #333;
+            --bg-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            --card-bg: #ffffff;
+            --card-shadow: rgba(0, 0, 0, 0.1);
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--secondary-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px var(--card-shadow);
+            overflow: hidden;
+        }
+        header {
+            background: var(--primary-color);
+            padding: 24px;
+            text-align: center;
+        }
+        header h1 {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+        .lab-list {
+            list-style: none;
+        }
+        .lab-list li {
+            margin: 16px;
+        }
+        .lab-link {
+            display: block;
+            background: var(--card-bg);
+            padding: 16px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 1.1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 12px var(--card-shadow);
+        }
+        .lab-link:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 18px var(--card-shadow);
+        }
+        @media (max-width: 480px) {
+            body {
+                padding: 20px;
+            }
+            header h1 {
+                font-size: 1.4rem;
+            }
+            .lab-link {
+                font-size: 1rem;
+                padding: 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Лабораторні работи</h1>
+        </header>
+        <ul class="lab-list">
+            <li><a class="lab-link" href="./1/index.html">Лабораторна работа 1</a></li>
+            <li><a class="lab-link" href="./2/index.html">Лабораторна работа 2</a></li>
+            <li><a class="lab-link" href="./3/index.html">Лабораторна работа 3</a></li>
+            <li><a class="lab-link" href="./4/index.html">Лабораторна работа 4</a></li>
+            <li><a class="lab-link" href="./5/index.html">Лабораторна работа 5</a></li>
+            <li><a class="lab-link" href="./6/index.html">Лабораторна работа 6</a></li>
+            <li><a class="lab-link" href="./7/index.html">Лабораторна работа 7</a></li>
+            <li><a class="lab-link" href="./8/index.html">Лабораторна работа 8</a></li>
+        </ul>
+    </div>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор викидів шкідливих речовин</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .fuel-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .fuel-section h2 {
+            color: #2980b9;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 30px auto;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3498db;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #e8f4f8;
+        }
+        .results h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 2px solid #c8e1f0;
+            padding-bottom: 10px;
+        }
+        .result-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .preset-section {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .preset-btn {
+            background-color: #27ae60;
+            margin-top: 20px;
+        }
+        .preset-btn:hover {
+            background-color: #2ecc71;
+        }
+        .fuel-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .fuel-toggle button {
+            flex: 1;
+            margin: 0;
+            background-color: #95a5a6;
+        }
+        .fuel-toggle button.active {
+            background-color: #2980b9;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .fuel-section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Калькулятор викидів твердих частинок</h1>
+        
+        <div class="preset-section">
+            <button id="controlExample" class="preset-btn">Завантажити контрольний приклад</button>
+            <button id="variant" class="preset-btn">Завантажити варіант 9</button>
+        </div>
+
+        <div class="fuel-toggle">
+            <button id="toggleCoal" class="active">Вугілля</button>
+            <button id="toggleMazut">Мазут</button>
+            <button id="toggleGas">Природний газ</button>
+        </div>
+
+        <div id="coalSection" class="fuel-section">
+            <h2>Вугілля</h2>
+            <div class="form-group">
+                <label for="coalConsumption">Витрата вугілля, т:</label>
+                <input type="number" id="coalConsumption" step="0.01" value="1096363">
+            </div>
+            <div class="form-group">
+                <label for="coalCalorificValue">Нижча теплота згоряння, МДж/кг:</label>
+                <input type="number" id="coalCalorificValue" step="0.01" value="20.47">
+            </div>
+            <div class="form-group">
+                <label for="coalAshContent">Вміст золи (A<sup>r</sup>), %:</label>
+                <input type="number" id="coalAshContent" step="0.01" value="25.20">
+            </div>
+            <div class="form-group">
+                <label for="coalAshRemoval">Частка леткої золи (a<sub>вин</sub>):</label>
+                <input type="number" id="coalAshRemoval" step="0.01" value="0.8">
+            </div>
+            <div class="form-group">
+                <label for="coalHeatLoss">Втрати тепла (q<sub>4</sub>), %:</label>
+                <input type="number" id="coalHeatLoss" step="0.01" value="1.0">
+            </div>
+            <div class="form-group">
+                <label for="coalCombustible">Вміст горючих речовин у викидах (Г<sub>вин</sub>), %:</label>
+                <input type="number" id="coalCombustible" step="0.01" value="1.5">
+            </div>
+            <div class="form-group">
+                <label for="coalFilterEfficiency">Ефективність очищення (η<sub>зу</sub>):</label>
+                <input type="number" id="coalFilterEfficiency" step="0.001" value="0.985">
+            </div>
+        </div>
+
+        <div id="mazutSection" class="fuel-section" style="display: none;">
+            <h2>Мазут</h2>
+            <div class="form-group">
+                <label for="mazutConsumption">Витрата мазуту, т:</label>
+                <input type="number" id="mazutConsumption" step="0.01" value="70945">
+            </div>
+            <div class="form-group">
+                <label for="mazutCalorificValue">Нижча теплота згоряння, МДж/кг:</label>
+                <input type="number" id="mazutCalorificValue" step="0.01" value="39.59">
+            </div>
+            <div class="form-group">
+                <label for="mazutAshContent">Вміст золи (A<sup>c</sup>), %:</label>
+                <input type="number" id="mazutAshContent" step="0.01" value="0.15">
+            </div>
+            <div class="form-group">
+                <label for="mazutWaterContent">Вологість (W<sup>r</sup>), %:</label>
+                <input type="number" id="mazutWaterContent" step="0.01" value="2.0">
+            </div>
+            <div class="form-group">
+                <label for="mazutFilterEfficiency">Ефективність очищення (η<sub>зу</sub>):</label>
+                <input type="number" id="mazutFilterEfficiency" step="0.001" value="0.985">
+            </div>
+        </div>
+
+        <div id="gasSection" class="fuel-section" style="display: none;">
+            <h2>Природний газ</h2>
+            <div class="form-group">
+                <label for="gasConsumption">Витрата газу, тис. м<sup>3</sup>:</label>
+                <input type="number" id="gasConsumption" step="0.01" value="84762">
+            </div>
+            <div class="form-group">
+                <label for="gasCalorificValue">Нижча теплота згоряння, МДж/м<sup>3</sup>:</label>
+                <input type="number" id="gasCalorificValue" step="0.01" value="33.08">
+            </div>
+            <div class="form-group">
+                <label for="gasDensity">Густина газу, кг/м<sup>3</sup>:</label>
+                <input type="number" id="gasDensity" step="0.001" value="0.723">
+            </div>
+        </div>
+
+        <button id="calculate">Розрахувати викиди</button>
+
+        <div class="results" id="results">
+            <h2>Результати розрахунку</h2>
+            <div class="result-item">
+                <span class="result-label">Показник емісії твердих частинок при спалюванні вугілля:</span>
+                <span id="coalEmissionFactor">-</span> г/ГДж
+            </div>
+            <div class="result-item">
+                <span class="result-label">Валовий викид при спалюванні вугілля:</span>
+                <span id="coalEmission">-</span> т
+            </div>
+            <div class="result-item">
+                <span class="result-label">Показник емісії твердих частинок при спалюванні мазуту:</span>
+                <span id="mazutEmissionFactor">-</span> г/ГДж
+            </div>
+            <div class="result-item">
+                <span class="result-label">Валовий викид при спалюванні мазуту:</span>
+                <span id="mazutEmission">-</span> т
+            </div>
+            <div class="result-item">
+                <span class="result-label">Показник емісії твердих частинок при спалюванні природного газу:</span>
+                <span id="gasEmissionFactor">-</span> г/ГДж
+            </div>
+            <div class="result-item">
+                <span class="result-label">Валовий викид при спалюванні природного газу:</span>
+                <span id="gasEmission">-</span> т
+            </div>
+            <div class="result-item">
+                <span class="result-label">Загальний валовий викид твердих частинок:</span>
+                <span id="totalEmission">-</span> т
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const Q_C = 32.68;
+        
+            const calculateBtn = document.getElementById('calculate');
+            const controlExampleBtn = document.getElementById('controlExample');
+            const variant9Btn = document.getElementById('variant');
+        
+            const toggleCoalBtn = document.getElementById('toggleCoal');
+            const toggleMazutBtn = document.getElementById('toggleMazut');
+            const toggleGasBtn = document.getElementById('toggleGas');
+        
+            const coalSection = document.getElementById('coalSection');
+            const mazutSection = document.getElementById('mazutSection');
+            const gasSection = document.getElementById('gasSection');
+        
+            const coalEmissionFactorEl = document.getElementById('coalEmissionFactor');
+            const coalEmissionEl = document.getElementById('coalEmission');
+            const mazutEmissionFactorEl = document.getElementById('mazutEmissionFactor');
+            const mazutEmissionEl = document.getElementById('mazutEmission');
+            const gasEmissionFactorEl = document.getElementById('gasEmissionFactor');
+            const gasEmissionEl = document.getElementById('gasEmission');
+            const totalEmissionEl = document.getElementById('totalEmission');
+        
+            function showSection(section) {
+                coalSection.style.display = 'none';
+                mazutSection.style.display = 'none';
+                gasSection.style.display = 'none';
+        
+                toggleCoalBtn.classList.remove('active');
+                toggleMazutBtn.classList.remove('active');
+                toggleGasBtn.classList.remove('active');
+        
+                if (section === 'coal') {
+                    coalSection.style.display = 'block';
+                    toggleCoalBtn.classList.add('active');
+                } else if (section === 'mazut') {
+                    mazutSection.style.display = 'block';
+                    toggleMazutBtn.classList.add('active');
+                } else if (section === 'gas') {
+                    gasSection.style.display = 'block';
+                    toggleGasBtn.classList.add('active');
+                }
+            }
+        
+            toggleCoalBtn.addEventListener('click', function() { showSection('coal'); });
+            toggleMazutBtn.addEventListener('click', function() { showSection('mazut'); });
+            toggleGasBtn.addEventListener('click', function() { showSection('gas'); });
+        
+            function calculateEmissions() {
+                const B_coal = parseFloat(document.getElementById("coalConsumption").value) || 0;
+                const Qr_coal = parseFloat(document.getElementById("coalCalorificValue").value) || 0;
+        
+                const B_mazut = parseFloat(document.getElementById("mazutConsumption").value) || 0;
+                const Qr_mazut = parseFloat(document.getElementById("mazutCalorificValue").value) || 0;
+        
+                const B_gas = parseFloat(document.getElementById("gasConsumption").value) || 0;
+                const Qr_gas = parseFloat(document.getElementById("gasCalorificValue").value) || 0;
+                const gas_density = parseFloat(document.getElementById("gasDensity").value) || 0.723;
+        
+                const k_tv_coal = 150;
+                const k_tv_mazut = 0.57;
+                const k_tv_gas = 0;
+        
+                const E_coal = 1e-6 * k_tv_coal * Qr_coal * B_coal;
+                const E_mazut = 1e-6 * k_tv_mazut * Qr_mazut * B_mazut;
+                const E_gas = 1e-6 * k_tv_gas * Qr_gas * B_gas * 1000 * gas_density;
+        
+                coalEmissionFactorEl.textContent = k_tv_coal.toFixed(2);
+                coalEmissionEl.textContent = E_coal.toFixed(2);
+        
+                mazutEmissionFactorEl.textContent = k_tv_mazut.toFixed(2);
+                mazutEmissionEl.textContent = E_mazut.toFixed(2);
+        
+                gasEmissionFactorEl.textContent = k_tv_gas.toFixed(2);
+                gasEmissionEl.textContent = E_gas.toFixed(2);
+        
+                const totalEmissions = E_coal + E_mazut + E_gas;
+                totalEmissionEl.textContent = totalEmissions.toFixed(2);
+            }
+        
+            calculateBtn.addEventListener('click', calculateEmissions);
+        
+            controlExampleBtn.addEventListener('click', function() {
+
+                document.getElementById("coalConsumption").value = 1096363;
+                document.getElementById("coalCalorificValue").value = 20.47;
+                document.getElementById("coalAshContent").value = 25.20;
+                document.getElementById("coalAshRemoval").value = 0.8;
+                document.getElementById("coalHeatLoss").value = 1.0;
+                document.getElementById("coalCombustible").value = 1.5;
+                document.getElementById("coalFilterEfficiency").value = 0.985;
+        
+                document.getElementById("mazutConsumption").value = 70945;
+                document.getElementById("mazutCalorificValue").value = 39.59;
+                document.getElementById("mazutAshContent").value = 0.15;
+                document.getElementById("mazutWaterContent").value = 2.0;
+                document.getElementById("mazutFilterEfficiency").value = 0.985;
+        
+                document.getElementById("gasConsumption").value = 84762;
+                document.getElementById("gasCalorificValue").value = 33.08;
+                document.getElementById("gasDensity").value = 0.723;
+        
+                calculateEmissions();
+            });
+        
+            variant9Btn.addEventListener('click', function() {
+
+                document.getElementById("coalConsumption").value = 1500000;
+                document.getElementById("coalCalorificValue").value = 19.5;
+                document.getElementById("coalAshContent").value = 27.0;
+                document.getElementById("coalAshRemoval").value = 0.75;
+                document.getElementById("coalHeatLoss").value = 1.2;
+                document.getElementById("coalCombustible").value = 2.0;
+                document.getElementById("coalFilterEfficiency").value = 0.980;
+        
+                document.getElementById("mazutConsumption").value = 80000;
+                document.getElementById("mazutCalorificValue").value = 40.0;
+                document.getElementById("mazutAshContent").value = 0.2;
+                document.getElementById("mazutWaterContent").value = 1.5;
+                document.getElementById("mazutFilterEfficiency").value = 0.980;
+        
+                document.getElementById("gasConsumption").value = 90000;
+                document.getElementById("gasCalorificValue").value = 34.0;
+                document.getElementById("gasDensity").value = 0.720;
+        
+                calculateEmissions();
+            });
+
+            calculateEmissions();
+        });
+        </script>
+        
+</body>
+</html>

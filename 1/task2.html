@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Веб-калькулятор мазуту</title>
+    <link rel="stylesheet" href="./styles/main.css">
+</head>
+<body>
+
+    <nav class="nav-menu">
+        <ul>
+            <li><a href="./index.html">Завдання 1: Склад</a></li>
+            <li><a href="./task2.html">Завдання 2: Мазут</a></li>
+        </ul>
+    </nav>
+
+    <h1>Калькулятор складу мазуту</h1>
+    <div class="container">
+        <h2>Введіть склад горючої маси мазуту:</h2>
+        <div class="input-group">
+            <label>H<sup>г</sup> (%):</label>
+            <input type="number" id="hg" step="0.1" min="0" max="100">
+            <label>C<sup>г</sup> (%):</label>
+            <input type="number" id="cg" step="0.1" min="0" max="100">
+            <label>S<sup>г</sup> (%):</label>
+            <input type="number" id="sg" step="0.1" min="0" max="100">
+        </div>
+        <div class="input-group">
+            <label>O<sup>г</sup> (%):</label>
+            <input type="number" id="og" step="0.1" min="0" max="100">
+            <label>Q<sup>г</sup> (МДж/кг):</label>
+            <input type="number" id="qg" step="0.1" min="0">
+            <label>V<sup>г</sup> (мг/кг):</label>
+            <input type="number" id="vg" step="0.1" min="0">
+        </div>
+        <div class="input-group">
+            <label>W<sup>p</sup> (%):</label>
+            <input type="number" id="wp" step="0.1" min="0" max="100">
+            <label>A<sup>d</sup> (%):</label>
+            <input type="number" id="ad" step="0.1" min="0" max="100">
+        </div>
+
+        <div class="buttons">
+            <button onclick="calculate()" id="button_1">Розрахувати</button>
+        </div>
+        
+        <section>
+            <div class="results" id="result" style="display: none;">
+                <h3>Результати робочої маси:</h3>
+                <h4>Склад робочої маси мазуту (%):</h4>
+                <p>H<sup>p</sup>: <span id="hp"></span></p>
+                <p>C<sup>p</sup>: <span id="cp"></span></p>
+                <p>S<sup>p</sup>: <span id="sp"></span></p>
+                <p>O<sup>p</sup>: <span id="op"></span></p>
+                <p>A<sup>p</sup>: <span id="ap"></span></p>
+                <h4>Додаткові параметри:</h4>
+                <p>V<sup>p</sup> (мг/кг): <span id="vp"></span></p>
+                <p>Q<sup>p</sup> (МДж/кг): <span id="qp"></span></p>
+            </div>
+        </section>
+    </div>
+
+    <script src="./scripts/task2.js"></script>
+</body>
+</html>

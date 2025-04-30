@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Веб-калькулятор для розрахунку КЗ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-button.active { background-color: #1d4ed8; color: white; }
+        .stability-result.stable { color: green; }
+        .stability-result.unstable { color: red; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="bg-white shadow-lg rounded-lg p-6 w-full max-w-2xl">
+        <h1 class="text-2xl font-bold text-center mb-6">Веб-калькулятор для розрахунку КЗ</h1>
+        
+        <!-- Tabs -->
+        <div class="flex border-b mb-4">
+            <button class="tab-button px-4 py-2 font-semibold rounded-t-md hover:bg-blue-100" onclick="openTab(event, 'threePhase')">Трифазне КЗ</button>
+            <button class="tab-button px-4 py-2 font-semibold rounded-t-md hover:bg-blue-100" onclick="openTab(event, 'singlePhase')">Однофазне КЗ</button>
+            <button class="tab-button px-4 py-2 font-semibold rounded-t-md hover:bg-blue-100" onclick="openTab(event, 'stability')">Стійкість</button>
+            <button class="tab-button px-4 py-2 font-semibold rounded-t-md hover:bg-blue-100" onclick="openTab(event, 'cableSelection')">Вибір кабелю</button>
+        </div>
+
+        <!-- Three Phase Tab -->
+        <div id="threePhase" class="tab-content">
+            <h2 class="text-xl font-semibold mb-4">Розрахунок струму трифазного КЗ</h2>
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label for="nominal-voltage" class="block text-sm font-medium">Номінальна напруга (кВ):</label>
+                    <input type="number" id="nominal-voltage" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 10.5">
+                </div>
+                <div>
+                    <label for="total-impedance" class="block text-sm font-medium">Сумарний опір (Ом):</label>
+                    <input type="number" id="total-impedance" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 2.39">
+                </div>
+                <button onclick="calculateThreePhase()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Розрахувати</button>
+            </div>
+            <div id="threephase-result" class="mt-4 hidden">
+                <p>Струм трифазного КЗ: <span id="threephase-current" class="font-bold"></span> кА</p>
+            </div>
+        </div>
+
+        <!-- Single Phase Tab -->
+        <div id="singlePhase" class="tab-content">
+            <h2 class="text-xl font-semibold mb-4">Розрахунок струму однофазного КЗ</h2>
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label for="phase-voltage" class="block text-sm font-medium">Фазна напруга (кВ):</label>
+                    <input type="number" id="phase-voltage" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 6.06">
+                </div>
+                <div>
+                    <label for="z1" class="block text-sm font-medium">Опір Z1 (Ом):</label>
+                    <input type="number" id="z1" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 2.39">
+                </div>
+                <div>
+                    <label for="z2" class="block text-sm font-medium">Опір Z2 (Ом):</label>
+                    <input type="number" id="z2" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 2.39">
+                </div>
+                <div>
+                    <label for="z0" class="block text-sm font-medium">Опір Z0 (Ом):</label>
+                    <input type="number" id="z0" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 7.17">
+                </div>
+                <button onclick="calculateSinglePhase()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Розрахувати</button>
+            </div>
+            <div id="singlephase-result" class="mt-4 hidden">
+                <p>Струм однофазного КЗ: <span id="singlephase-current" class="font-bold"></span> кА</p>
+            </div>
+        </div>
+
+        <!-- Stability Check Tab -->
+        <div id="stability" class="tab-content">
+            <h2 class="text-xl font-semibold mb-4">Перевірка на термічну та динамічну стійкість</h2>
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label for="short-circuit-current" class="block text-sm font-medium">Струм КЗ (А):</label>
+                    <input type="number" id="short-circuit-current" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 2500">
+                </div>
+                <div>
+                    <label for="pulse-coefficient" class="block text-sm font-medium">Коефіцієнт ударного струму:</label>
+                    <input type="number" id="pulse-coefficient" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 1.8">
+                </div>
+                <div>
+                    <label for="thermal-time" class="block text-sm font-medium">Фіктивний час КЗ (с):</label>
+                    <input type="number" id="thermal-time" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 2.5">
+                </div>
+                <div>
+                    <label for="dynamic-stability" class="block text-sm font-medium">Динамічна стійкість (А):</label>
+                    <input type="number" id="dynamic-stability" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 10000">
+                </div>
+                <div>
+                    <label for="thermal-stability" class="block text-sm font-medium">Термічна стійкість (А):</label>
+                    <input type="number" id="thermal-stability" step any" class="w-full p-2 border rounded-md" placeholder="Напр. 5000">
+                </div>
+                <div>
+                    <label for="thermal-time-equipment" class="block text-sm font-medium">Час термічної стійкості обладнання (с):</label>
+                    <input type="number" id="thermal-time-equipment" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 4">
+                </div>
+                <button onclick="checkStability()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Перевірити</button>
+            </div>
+            <div id="stability-result" class="mt-4 hidden">
+                <p>Ударний струм: <span id="pulse-current" class="font-bold"></span> А</p>
+                <p>Тепловий імпульс: <span id="thermal-impulse" class="font-bold"></span> А²·с</p>
+                <p>Динамічна стійкість: <span id="dynamic-result" class="stability-result"></span></p>
+                <p>Термічна стійкість: <span id="thermal-result" class="stability-result"></span></p>
+            </div>
+        </div>
+
+        <!-- Cable Selection Tab -->
+        <div id="cableSelection" class="tab-content">
+            <h2 class="text-xl font-semibold mb-4">Вибір кабелю для двотрансформаторної підстанції</h2>
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label for="load-power" class="block text-sm font-medium">Розрахункове навантаження (кВ·А):</label>
+                    <input type="number" id="load-power" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 1300">
+                </div>
+                <div>
+                    <label for="nominal-voltage-cable" class="block text-sm font-medium">Номінальна напруга (кВ):</label>
+                    <input type="number" id="nominal-voltage-cable" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 10">
+                </div>
+                <div>
+                    <label for="economic-density" class="block text-sm font-medium">Економічна густина струму (А/мм²):</label>
+                    <input type="number" id="economic-density" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 1.4">
+                </div>
+                <div>
+                    <label for="short-circuit-current-cable" class="block text-sm font-medium">Струм КЗ (А):</label>
+                    <input type="number" id="short-circuit-current-cable" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 2500">
+                </div>
+                <div>
+                    <label for="thermal-time-cable" class="block text-sm font-medium">Фіктивний час КЗ (с):</label>
+                    <input type="number" id="thermal-time-cable" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 2.5">
+                </div>
+                <div>
+                    <label for="thermal-coefficient" class="block text-sm font-medium">Термічний коефіцієнт (А·с^1/2/мм²):</label>
+                    <input type="number" id="thermal-coefficient" step="any" class="w-full p-2 border rounded-md" placeholder="Напр. 92">
+                </div>
+                <button onclick="selectCable()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Розрахувати</button>
+            </div>
+            <div id="cable-result" class="mt-4 hidden">
+                <p>Розрахунковий струм: <span id="calculated-current" class="font-bold"></span> А</p>
+                <p>Переріз за економічною густиною: <span id="economic-section" class="font-bold"></span> мм²</p>
+                <p>Мінімальний переріз за термічною стійкістю: <span id="thermal-section" class="font-bold"></span> мм²</p>
+                <p>Рекомендований переріз: <span id="recommended-section" class="font-bold"></span> мм²</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabContent, tabButtons;
+            
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].style.display = "none";
+            }
+            
+            tabButtons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+            }
+
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        
+        function calculateThreePhase() {
+            const nominalVoltage = parseFloat(document.getElementById("nominal-voltage").value);
+            const totalImpedance = parseFloat(document.getElementById("total-impedance").value);
+            
+            if (!nominalVoltage || !totalImpedance) {
+                alert("Будь ласка, заповніть всі поля!");
+                return;
+            }
+            
+            const current = (nominalVoltage / (Math.sqrt(3) * totalImpedance));
+            
+            document.getElementById("threephase-current").textContent = current.toFixed(2);
+            document.getElementById("threephase-result").style.display = "block";
+        }
+        
+        function calculateSinglePhase() {
+            const phaseVoltage = parseFloat(document.getElementById("phase-voltage").value);
+            const z1 = parseFloat(document.getElementById("z1").value);
+            const z2 = parseFloat(document.getElementById("z2").value);
+            const z0 = parseFloat(document.getElementById("z0").value);
+            
+            if (!phaseVoltage || !z1 || !z2 || !z0) {
+                alert("Будь ласка, заповніть всі поля!");
+                return;
+            }
+            
+            const current = (3 * phaseVoltage) / (z1 + z2 + z0);
+            
+            document.getElementById("singlephase-current").textContent = current.toFixed(2);
+            document.getElementById("singlephase-result").style.display = "block";
+        }
+        
+        function checkStability() {
+            const shortCircuitCurrent = parseFloat(document.getElementById("short-circuit-current").value);
+            const pulseCoefficient = parseFloat(document.getElementById("pulse-coefficient").value);
+            const thermalTime = parseFloat(document.getElementById("thermal-time").value);
+            const dynamicStability = parseFloat(document.getElementById("dynamic-stability").value);
+            const thermalStability = parseFloat(document.getElementById("thermal-stability").value);
+            const thermalTimeEquipment = parseFloat(document.getElementById("thermal-time-equipment").value);
+            
+            if (!shortCircuitCurrent || !pulseCoefficient || !thermalTime || 
+                !dynamicStability || !thermalStability || !thermalTimeEquipment) {
+                alert("Будь ласка, заповніть всі поля!");
+                return;
+            }
+
+            const pulseCurrent = shortCircuitCurrent * Math.sqrt(2) * pulseCoefficient;
+            const thermalImpulse = Math.pow(shortCircuitCurrent, 2) * thermalTime;
+            
+            const isDynamicallyStable = pulseCurrent <= dynamicStability;
+            const thermalLimit = Math.pow(thermalStability, 2) * thermalTimeEquipment;
+            const isThermallyStable = thermalImpulse <= thermalLimit;
+
+            document.getElementById("pulse-current").textContent = pulseCurrent.toFixed(2);
+            document.getElementById("thermal-impulse").textContent = thermalImpulse.toFixed(2);
+            
+            const dynamicResult = document.getElementById("dynamic-result");
+            dynamicResult.textContent = isDynamicallyStable ? "ВІДПОВІДАЄ" : "НЕ ВІДПОВІДАЄ";
+            dynamicResult.className = isDynamicallyStable ? "stability-result stable" : "stability-result unstable";
+            
+            const thermalResult = document.getElementById("thermal-result");
+            thermalResult.textContent = isThermallyStable ? "ВІДПОВІДАЄ" : "НЕ ВІДПОВІДАЄ";
+            thermalResult.className = isThermallyStable ? "stability-result stable" : "stability-result unstable";
+            
+            document.getElementById("stability-result").style.display = "block";
+        }
+
+        function selectCable() {
+            const loadPower = parseFloat(document.getElementById("load-power").value);
+            const nominalVoltage = parseFloat(document.getElementById("nominal-voltage-cable").value);
+            const economicDensity = parseFloat(document.getElementById("economic-density").value);
+            const shortCircuitCurrent = parseFloat(document.getElementById("short-circuit-current-cable").value);
+            const thermalTime = parseFloat(document.getElementById("thermal-time-cable").value);
+            const thermalCoefficient = parseFloat(document.getElementById("thermal-coefficient").value);
+
+            if (!loadPower || !nominalVoltage || !economicDensity || 
+                !shortCircuitCurrent || !thermalTime || !thermalCoefficient) {
+                alert("Будь ласка, заповніть всі поля!");
+                return;
+            }
+
+            const calculatedCurrent = (loadPower / 2) / (Math.sqrt(3) * nominalVoltage);
+            
+            const economicSection = calculatedCurrent / economicDensity;
+            
+            const thermalSection = (shortCircuitCurrent * Math.sqrt(thermalTime)) / thermalCoefficient;
+
+            const standardSections = [10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240];
+            const recommendedSection = standardSections.find(section => section >= Math.max(economicSection, thermalSection)) || Math.max(economicSection, thermalSection);
+
+            document.getElementById("calculated-current").textContent = calculatedCurrent.toFixed(2);
+            document.getElementById("economic-section").textContent = economicSection.toFixed(2);
+            document.getElementById("thermal-section").textContent = thermalSection.toFixed(2);
+            document.getElementById("recommended-section").textContent = recommendedSection.toFixed(2);
+            document.getElementById("cable-result").style.display = "block";
+        }
+
+        document.getElementsByClassName("tab-button")[0].click();
+    </script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор електропостачання</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .nav-item.active { background-color: #2563eb; color: white; border-radius: 8px; }
+        .nav-item:hover { background-color: #dbeafe; }
+    </style>
+</head>
+<body class="bg-gray-200 flex flex-col items-center justify-center min-h-screen p-6">
+    <div class="bg-white rounded-xl shadow-xl p-8 w-full max-w-4xl">
+        <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Калькулятор електропостачання</h1>
+
+        <!-- Navigation -->
+        <div class="flex justify-center space-x-4 mb-6">
+            <button class="nav-item px-6 py-3 text-lg font-medium" onclick="switchPanel(this, 'system-reliability')">Надійність систем</button>
+            <button class="nav-item px-6 py-3 text-lg font-medium" onclick="switchPanel(this, 'power-losses')">Збитки</button>
+        </div>
+
+        <!-- System Reliability Panel -->
+        <div id="system-reliability" class="panel">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-700">Аналіз надійності систем</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="switch110-failure" class="block text-sm font-medium text-gray-600">Вимикач 110 кВ (1/рік):</label>
+                    <input type="number" id="switch110-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.01">
+                </div>
+                <div>
+                    <label for="line110-failure" class="block text-sm font-medium text-gray-600">ЛЕП 110 кВ (1/рік):</label>
+                    <input type="number" id="line110-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.07">
+                </div>
+                <div>
+                    <label for="trans-failure" class="block text-sm font-medium text-gray-600">Трансформатор (1/рік):</label>
+                    <input type="number" id="trans-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.015">
+                </div>
+                <div>
+                    <label for="switch10-failure" class="block text-sm font-medium text-gray-600">Вимикач 10 кВ (1/рік):</label>
+                    <input type="number" id="switch10-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.02">
+                </div>
+                <div>
+                    <label for="conn-failure" class="block text-sm font-medium text-gray-600">З'єднання (1/рік):</label>
+                    <input type="number" id="conn-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.03">
+                </div>
+                <div>
+                    <label for="conn-count" class="block text-sm font-medium text-gray-600">Кількість з'єднань:</label>
+                    <input type="number" id="conn-count" class="w-full p-3 border rounded-lg" placeholder="6">
+                </div>
+                <div>
+                    <label for="switch110-recovery" class="block text-sm font-medium text-gray-600">Відновлення вимикача 110 кВ (год):</label>
+                    <input type="number" id="switch110-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="30">
+                </div>
+                <div>
+                    <label for="line110-recovery" class="block text-sm font-medium text-gray-600">Відновлення ЛЕП 110 кВ (год):</label>
+                    <input type="number" id="line110-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="0.07">
+                </div>
+                <div>
+                    <label for="trans-recovery" class="block text-sm font-medium text-gray-600">Відновлення трансформатора (год):</label>
+                    <input type="number" id="trans-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="100">
+                </div>
+                <div>
+                    <label for="switch10-recovery" class="block text-sm font-medium text-gray-600">Відновлення вимикача 10 кВ (год):</label>
+                    <input type="number" id="switch10-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="0.02">
+                </div>
+                <div>
+                    <label for="conn-recovery" class="block text-sm font-medium text-gray-600">Відновлення з'єднань (год):</label>
+                    <input type="number" id="conn-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="1.8">
+                </div>
+                <div>
+                    <label for="planned-downtime" class="block text-sm font-medium text-gray-600">Плановий простій (год):</label>
+                    <input type="number" id="planned-downtime" step="any" class="w-full p-3 border rounded-lg" placeholder="43">
+                </div>
+                <div>
+                    <label for="section-switch-failure" class="block text-sm font-medium text-gray-600">Секційний вимикач (1/рік):</label>
+                    <input type="number" id="section-switch-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.002">
+                </div>
+            </div>
+            <button onclick="computeReliability()" class="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">Обчислити</button>
+
+            <div id="reliability-output" class="mt-6 hidden">
+                <h3 class="text-lg font-semibold text-gray-700">Результати:</h3>
+                <p>ω_одноколова: <span id="single-loop-rate" class="font-bold"></span> 1/рік</p>
+                <p>ω_двоколова: <span id="dual-loop-rate" class="font-bold"></span> 1/рік</p>
+                <p>t_одноколова: <span id="single-loop-time" class="font-bold"></span> год</p>
+                <p>t_двоколова: <span id="dual-loop-time" class="font-bold"></span> год</p>
+                <p>k_авар_одноколова: <span id="single-emergency-coef" class="font-bold"></span></p>
+                <p>k_авар_двоколова: <span id="dual-emergency-coef" class="font-bold"></span></p>
+                <p>k_план_одноколова: <span id="single-planned-coef" class="font-bold"></span></p>
+                <p>k_план_двоколова: <span id="dual-planned-coef" class="font-bold"></span></p>
+                <p id="system-conclusion" class="mt-3"></p>
+            </div>
+        </div>
+
+        <!-- Power Losses Panel -->
+        <div id="power-losses" class="panel">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-700">Розрахунок збитків</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="system-failure-rate" class="block text-sm font-medium text-gray-600">Інтенсивність відмов (1/рік):</label>
+                    <input type="number" id="system-failure-rate" step="any" class="w-full p-3 border rounded-lg" placeholder="0.295">
+                </div>
+                <div>
+                    <label for="system-recovery-time" class="block text-sm font-medium text-gray-600">Час відновлення (год):</label>
+                    <input type="number" id="system-recovery-time" step="any" class="w-full p-3 border rounded-lg" placeholder="10.7">
+                </div>
+                <div>
+                    <label for="system-downtime" class="block text-sm font-medium text-gray-600">Плановий простій (год):</label>
+                    <input type="number" id="system-downtime" step="any" class="w-full p-3 border rounded-lg" placeholder="43">
+                </div>
+                <div>
+                    <label for="peak-load" class="block text-sm font-medium text-gray-600">Максимальне навантаження (кВт):</label>
+                    <input type="number" id="peak-load" step="any" class="w-full p-3 border rounded-lg" placeholder="512">
+                </div>
+                <div>
+                    <label for="operation-time" class="block text-sm font-medium text-gray-600">Час використання (год):</label>
+                    <input type="number" id="operation-time" step="any" class="w-full p-3 border rounded-lg" placeholder="6451">
+                </div>
+                <div>
+                    <label for="emergency-cost-rate" class="block text-sm font-medium text-gray-600">Тариф аварійних збитків (грн/кВт·год):</label>
+                    <input type="number" id="emergency-cost-rate" step="any" class="w-full p-3 border rounded-lg" placeholder="23.6">
+                </div>
+                <div>
+                    <label for="planned-cost-rate" class="block text-sm font-medium text-gray-600">Тариф планових збитків (грн/кВт·год):</label>
+                    <input type="number" id="planned-cost-rate" step="any" class="w-full p-3 border rounded-lg" placeholder="17.6">
+                </div>
+            </div>
+            <button onclick="computeLosses()" class="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">Обчислити</button>
+
+            <div id="losses-output" class="mt-6 hidden">
+                <h3 class="text-lg font-semibold text-gray-700">Результати:</h3>
+                <p><strong>Аварійне недовідпущення:</strong> <span id="emerg-underdelivery"></span> кВт·год</p>
+                <p><strong>Планове недовідпущення:</strong> <span id="plan-underdelivery"></span> кВт·год</p>
+                <p><strong>Збитки:</strong></p>
+                <p>Аварійні: <span id="emerg-cost"></span> грн</p>
+                <p>Планові: <span id="plan-cost"></span> грн</p>
+                <p>Загальні: <span id="total-cost"></span> грн</p>
+                <table class="table-auto w-full mt-4 border-collapse border border-gray-400">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border border-gray-400 p-3">Параметр</th>
+                            <th class="border border-gray-400 p-3">Значення</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-gray-400 p-3">Аварійне недовідпущення (кВт·год)</td>
+                            <td class="border border-gray-400 p-3" id="emerg-underdelivery-table"></td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-400 p-3">Планове недовідпущення (кВт·год)</td>
+                            <td class="border border-gray-400 p-3" id="plan-underdelivery-table"></td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-400 p-3">Загальна енергія (кВт·год)</td>
+                            <td class="border border-gray-400 p-3" id="total-energy-table"></td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-400 p-3">Аварійні збитки (грн)</td>
+                            <td class="border border-gray-400 p-3" id="emerg-cost-table"></td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-400 p-3">Планові збитки (грн)</td>
+                            <td class="border border-gray-400 p-3" id="plan-cost-table"></td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-400 p-3">Загальні збитки (грн)</td>
+                            <td class="border border-gray-400 p-3" id="total-cost-table"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchPanel(selectedNav, panelId) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            selectedNav.classList.add('active');
+
+            document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+        }
+
+        function computeReliability() {
+            const inputs = {
+                switch110: parseFloat(document.getElementById('switch110-failure').value),
+                line110: parseFloat(document.getElementById('line110-failure').value),
+                transformer: parseFloat(document.getElementById('trans-failure').value),
+                switch10: parseFloat(document.getElementById('switch10-failure').value),
+                connection: parseFloat(document.getElementById('conn-failure').value),
+                connCount: parseInt(document.getElementById('conn-count').value),
+                switch110Rec: parseFloat(document.getElementById('switch110-recovery').value),
+                line110Rec: parseFloat(document.getElementById('line110-recovery').value),
+                transRec: parseFloat(document.getElementById('trans-recovery').value),
+                switch10Rec: parseFloat(document.getElementById('switch10-recovery').value),
+                connRec: parseFloat(document.getElementById('conn-recovery').value),
+                plannedDowntime: parseFloat(document.getElementById('planned-downtime').value),
+                sectionSwitch: parseFloat(document.getElementById('section-switch-failure').value)
+            };
+
+            for (let key in inputs) {
+                if (isNaN(inputs[key])) {
+                    alert("Заповніть усі поля коректними значеннями!");
+                    return;
+                }
+            }
+
+            const singleRate = inputs.switch110 + inputs.line110 + inputs.transformer + inputs.switch10 + (inputs.connection * inputs.connCount);
+            const singleTime = (inputs.switch110 * inputs.switch110Rec + inputs.line110 * inputs.line110Rec + 
+                               inputs.transformer * inputs.transRec + inputs.switch10 * inputs.switch10Rec + 
+                               (inputs.connection * inputs.connCount * inputs.connRec)) / singleRate;
+            const emergCoefSingle = (singleRate * singleTime) * 1e-3;
+            const planCoefSingle = 1.2 * inputs.plannedDowntime * 1e-3;
+
+            const dualRateTemp = 2 * singleRate * (emergCoefSingle + planCoefSingle);
+            const dualRate = dualRateTemp + inputs.sectionSwitch;
+            const dualTime = singleTime * 0.7;
+            const emergCoefDual = (dualRate * dualTime) * 1e-3;
+            const planCoefDual = planCoefSingle * 0.8;
+
+            document.getElementById('single-loop-rate').textContent = singleRate.toFixed(3);
+            document.getElementById('dual-loop-rate').textContent = dualRate.toFixed(4);
+            document.getElementById('single-loop-time').textContent = singleTime.toFixed(1);
+            document.getElementById('dual-loop-time').textContent = dualTime.toFixed(1);
+            document.getElementById('single-emergency-coef').textContent = emergCoefSingle.toExponential(2);
+            document.getElementById('dual-emergency-coef').textContent = emergCoefDual.toExponential(2);
+            document.getElementById('single-planned-coef').textContent = planCoefSingle.toExponential(2);
+            document.getElementById('dual-planned-coef').textContent = planCoefDual.toExponential(2);
+
+            const conclusionElement = document.getElementById('system-conclusion');
+            conclusionElement.innerHTML = dualRate < singleRate 
+                ? '<strong>Висновок:</strong> Двоколова система надійніша'
+                : '<strong>Висновок:</strong> Одноколова система краща за надійністю';
+
+            document.getElementById('reliability-output').classList.remove('hidden');
+        }
+
+        function computeLosses() {
+            const data = {
+                rate: parseFloat(document.getElementById('system-failure-rate').value),
+                recovery: parseFloat(document.getElementById('system-recovery-time').value),
+                downtime: parseFloat(document.getElementById('system-downtime').value),
+                load: parseFloat(document.getElementById('peak-load').value),
+                time: parseFloat(document.getElementById('operation-time').value),
+                emergRate: parseFloat(document.getElementById('emergency-cost-rate').value),
+                planRate: parseFloat(document.getElementById('planned-cost-rate').value)
+            };
+
+            for (let key in data) {
+                if (isNaN(data[key])) {
+                    alert("Заповніть усі поля коректними значеннями!");
+                    return;
+                }
+            }
+
+            const recoveryYears = data.recovery * 1e-3;
+            const downtimeYears = data.downtime * 1e-3;
+
+            const emergUnderdelivery = data.rate * recoveryYears * data.load * data.time;
+            const planUnderdelivery = downtimeYears * data.load * data.time;
+
+            const emergCost = data.emergRate * emergUnderdelivery;
+            const planCost = data.planRate * planUnderdelivery;
+            const totalCost = emergCost + planCost;
+            const totalEnergy = emergUnderdelivery + planUnderdelivery;
+
+            document.getElementById('emerg-underdelivery').textContent = emergUnderdelivery.toFixed(0);
+            document.getElementById('plan-underdelivery').textContent = planUnderdelivery.toFixed(0);
+            document.getElementById('emerg-cost').textContent = emergCost.toFixed(0);
+            document.getElementById('plan-cost').textContent = planCost.toFixed(0);
+            document.getElementById('total-cost').textContent = totalCost.toFixed(0);
+
+            document.getElementById('emerg-underdelivery-table').textContent = emergUnderdelivery.toFixed(0);
+            document.getElementById('plan-underdelivery-table').textContent = planUnderdelivery.toFixed(0);
+            document.getElementById('total-energy-table').textContent = totalEnergy.toFixed(0);
+            document.getElementById('emerg-cost-table').textContent = emergCost.toFixed(0);
+            document.getElementById('plan-cost-table').textContent = planCost.toFixed(0);
+            document.getElementById('total-cost-table').textContent = totalCost.toFixed(0);
+
+            document.getElementById('losses-output').classList.remove('hidden');
+        }
+
+        window.onload = function() {
+            document.querySelector('.nav-item').click();
+        };
+    </script>
+</body>
+</html>
