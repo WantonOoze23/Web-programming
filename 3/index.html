@@ -129,43 +129,7 @@
 <div class="container">
     <h1>Розширений калькулятор прибутку СЕС</h1>
     
-    <div class="tabs">
-        <div class="tab active" data-tab="basic">Базовий розрахунок</div>
-        <div class="tab" data-tab="advanced">Розширений аналіз</div>
-    </div>
-    
-    <div id="basicTab" class="tab-content active">
-        <div class="form-group">
-            <label for="installedPower">Встановлена потужність станції (кВт):</label>
-            <input type="number" id="installedPower" step="0.01" placeholder="Наприклад, 30">
-        </div>
-
-        <div class="form-group">
-            <label for="averageIrradiance">Середня інсоляція (кВт·год/м²/день):</label>
-            <input type="number" id="averageIrradiance" step="0.01" placeholder="Наприклад, 4.5">
-        </div>
-
-        <div class="form-group">
-            <label for="panelEfficiency">ККД панелей (%):</label>
-            <input type="number" id="panelEfficiency" step="0.1" placeholder="Наприклад, 18">
-        </div>
-
-        <div class="form-group">
-            <label for="pricePerKWh">Ціна за 1 кВт·год (грн):</label>
-            <input type="number" id="pricePerKWh" step="0.01" placeholder="Наприклад, 5">
-        </div>
-
-        <div class="form-group">
-            <label for="days">Кількість днів у році (для прогнозу):</label>
-            <input type="number" id="days" value="365">
-        </div>
-
-        <button onclick="calculateBasicProfit()">Розрахувати прибуток</button>
-        
-        <div id="basicResult" class="result-container"></div>
-    </div>
-    
-    <div id="advancedTab" class="tab-content">
+    <div id="advancedTab" class="tab-content active">
         <div class="form-group">
             <label for="nominalPower">Номінальна потужність станції (МВт):</label>
             <input type="number" id="nominalPower" step="0.01" placeholder="Наприклад, 5">
@@ -198,9 +162,7 @@
 </div>
 
 <script>
-    // Утиліти для математичних обчислень
     const MathUtils = {
-        // Наближений розрахунок функції помилок erf(x)
         erf: function(x) {
             const a1 =  0.254829592; const a2 = -0.284496736;
             const a3 =  1.421413741; const a4 = -1.453152027;
@@ -211,13 +173,11 @@
             const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * Math.exp(-x * x);
             return sign * y;
         },
-        
-        // Функція стандартного нормального розподілу (CDF) - Phi(z)
+
         standardNormalCDF: function(z) {
             return 0.5 * (1 + this.erf(z / Math.SQRT2));
         },
         
-        // Функція нормального розподілу CDF для заданих mu та sigma
         normalCDF: function(x, mu, sigma) {
             if (sigma <= 0) return (x < mu) ? 0 : 1;
             return this.standardNormalCDF((x - mu) / sigma);
@@ -243,68 +203,6 @@
         }
     };
     
-    // Базовий калькулятор прибутку СЕС
-    function calculateBasicProfit() {
-        const installedPower = parseFloat(document.getElementById('installedPower').value) || 0;
-        const averageIrradiance = parseFloat(document.getElementById('averageIrradiance').value) || 0;
-        const panelEfficiency = parseFloat(document.getElementById('panelEfficiency').value) || 0;
-        const pricePerKWh = parseFloat(document.getElementById('pricePerKWh').value) || 0;
-        const days = parseInt(document.getElementById('days').value) || 365;
-        
-        // Валідація вхідних даних
-        if (installedPower <= 0 || averageIrradiance <= 0 || panelEfficiency <= 0 || pricePerKWh <= 0) {
-            document.getElementById('basicResult').innerHTML = `
-                <div class="result-group" style="border-left-color: #e74c3c;">
-                    <h3 style="color: #e74c3c;">Помилка</h3>
-                    <p>Будь ласка, заповніть всі поля коректними значеннями більше нуля.</p>
-                </div>
-            `;
-            return;
-        }
-
-        // Коефіцієнт перетворення: встановлена потужність × середня інсоляція × ККД
-        const dailyProduction = installedPower * averageIrradiance * (panelEfficiency / 100);
-
-        // Загальне виробництво за обраний період
-        const yearlyProduction = dailyProduction * days;
-
-        // Прибуток
-        const profit = yearlyProduction * pricePerKWh;
-        
-        // Розрахунок приблизних місячних значень
-        const monthlyProduction = yearlyProduction / 12;
-        const monthlyProfit = profit / 12;
-        
-        document.getElementById('basicResult').innerHTML = `
-            <div class="result-group">
-                <h3>Результати розрахунку</h3>
-                <div class="result-row">
-                    <span class="result-label">Середнє денне виробництво:</span>
-                    <span class="result-value">${dailyProduction.toFixed(2)} кВт·год</span>
-                </div>
-                <div class="result-row">
-                    <span class="result-label">Загальне виробництво за ${days} днів:</span>
-                    <span class="result-value">${yearlyProduction.toFixed(2)} кВт·год</span>
-                </div>
-                <div class="result-row">
-                    <span class="result-label">Середнє місячне виробництво:</span>
-                    <span class="result-value">${monthlyProduction.toFixed(2)} кВт·год</span>
-                </div>
-                <div class="result-row">
-                    <span class="result-label">Середній місячний прибуток:</span>
-                    <span class="result-value">${monthlyProfit.toFixed(2)} грн</span>
-                </div>
-            </div>
-            <div class="final-result">
-                <h3>Загальний прибуток</h3>
-                <div class="final-value">
-                    ${profit.toFixed(2)} грн
-                </div>
-            </div>
-        `;
-    }
-    
-    // Розширений калькулятор з урахуванням похибок прогнозування
     class ProfitCalculator {
         constructor() {
             this.values = {};
@@ -355,24 +253,19 @@
             this.values.totalEnergyPerDay = nominalPower * this.values.hours;
         }
         
-        // Розрахунок для початкового стану 
         calculateInitialState() {
             const { lowerBound, upperBound, nominalPower, initialSigma, totalEnergyPerDay, pricePerMWh } = this.values;
-            
-            // Частка енергії без небалансів
+
             const deltaW1_raw = MathUtils.normalCDF(upperBound, nominalPower, initialSigma) - 
                             MathUtils.normalCDF(lowerBound, nominalPower, initialSigma);
             const deltaW1_percent = deltaW1_raw * 100;
-            
-            // Енергія без небалансів та прибуток від неї
+
             const W1 = totalEnergyPerDay * deltaW1_raw;
             const Pi1 = W1 * pricePerMWh;
             
-            // Енергія з небалансами та штраф за неї
             const W2 = totalEnergyPerDay * (1 - deltaW1_raw);
             const LLI1 = W2 * pricePerMWh;
             
-            // Загальний результат
             const Result1 = Pi1 - LLI1;
             
             this.results.initial = {
@@ -386,24 +279,19 @@
             };
         }
         
-        // Розрахунок для покращеного стану 
         calculateImprovedState() {
             const { lowerBound, upperBound, nominalPower, improvedSigma, totalEnergyPerDay, pricePerMWh } = this.values;
             
-            // Частка енергії без небалансів 
             const deltaW2_raw = MathUtils.normalCDF(upperBound, nominalPower, improvedSigma) - 
                             MathUtils.normalCDF(lowerBound, nominalPower, improvedSigma);
             const deltaW2_percent = deltaW2_raw * 100;
             
-            // Енергія без небалансів та прибуток від неї 
             const W3 = totalEnergyPerDay * deltaW2_raw;
             const Pi2 = W3 * pricePerMWh;
             
-            // Енергія з небалансами та штраф за неї 
             const W4 = totalEnergyPerDay * (1 - deltaW2_raw);
             const LLI2 = W4 * pricePerMWh;
             
-            // Загальний результат 
             const Result2 = Pi2 - LLI2;
             
             this.results.improved = {
@@ -519,13 +407,11 @@
         }
     }
     
-    // Управління табами
     document.addEventListener('DOMContentLoaded', function() {
         const tabs = document.querySelectorAll('.tab');
         
         tabs.forEach(tab => {
             tab.addEventListener('click', function() {
-                // Видалити активний клас з усіх табів
                 tabs.forEach(t => t.classList.remove('active'));
                 
                 this.classList.add('active');
@@ -535,9 +421,7 @@
                 });
                 
                 const tabId = this.getAttribute('data-tab');
-                if (tabId === 'basic') {
-                    document.getElementById('basicTab').classList.add('active');
-                } else if (tabId === 'advanced') {
+                if (tabId === 'advanced') {
                     document.getElementById('advancedTab').classList.add('active');
                 }
             });
