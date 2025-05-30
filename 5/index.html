@@ -6,91 +6,287 @@
     <title>Калькулятор електропостачання</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Панелі */
         .panel { display: none; }
         .panel.active { display: block; }
-        .nav-item.active { background-color: #2563eb; color: white; border-radius: 8px; }
-        .nav-item:hover { background-color: #dbeafe; }
+
+        /* Навігація */
+        .nav-item {
+            padding: 12px 24px;
+            font-size: 1.125rem;
+            font-weight: 500;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .nav-item.active {
+            background-color: #2563eb;
+            color: white;
+            border-radius: 8px;
+        }
+        .nav-item:hover {
+            background-color: #dbeafe;
+        }
+
+        /* Основний контейнер */
+        body {
+            background-color: #e5e7eb;
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .main-container {
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px 0 rgba(0,0,0,0.1);
+            padding: 32px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* Заголовки */
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 32px;
+            color: #1f2937;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #374151;
+        }
+        h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #374151;
+            text-align: center;
+        }
+
+        /* Грід */
+        .grid {
+            display: grid;
+            gap: 24px;
+        }
+        @media (min-width: 768px) {
+            .grid-cols-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .grid-cols-1 { grid-template-columns: 1fr; }
+
+        /* Форма */
+        label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #4b5563;
+            margin-bottom: 4px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        /* Кнопки */
+        .btn {
+            margin-top: 24px;
+            background-color: #2563eb;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 0.5rem;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* Таблиці */
+        table {
+            width: 100%;
+            margin-top: 16px;
+            border-collapse: collapse;
+            border: 1px solid #9ca3af;
+        }
+        th, td {
+            border: 1px solid #9ca3af;
+            padding: 12px;
+            text-align: left;
+        }
+        thead tr {
+            background-color: #f3f4f6;
+        }
+        /* Додаткові стилі */
+        .mt-6 { margin-top: 24px; }
+        .mb-6 { margin-bottom: 24px; }
+        .mb-8 { margin-bottom: 32px; }
+        .space-x-4 > * + * { margin-left: 16px; }
+        .space-y-4 > * + * { margin-top: 16px; }
+        .hidden { display: none; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-xl { border-radius: 1rem; }
+        .shadow-xl { box-shadow: 0 10px 25px 0 rgba(0,0,0,0.1); }
+        .font-bold { font-weight: bold; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .text-center { text-align: center; }
+        .text-lg { font-size: 1.125rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-3xl { font-size: 2rem; }
+        .text-gray-600 { color: #4b5563; }
+        .text-gray-700 { color: #374151; }
+        .text-gray-800 { color: #1f2937; }
+        .bg-white { background: #fff; }
+        .bg-gray-100 { background: #f3f4f6; }
+        .bg-gray-200 { background: #e5e7eb; }
+        .bg-blue-600 { background: #2563eb; }
+        .hover\:bg-blue-700:hover { background: #1d4ed8; }
     </style>
 </head>
 <body class="bg-gray-200 flex flex-col items-center justify-center min-h-screen p-6">
-    <div class="bg-white rounded-xl shadow-xl p-8 w-full max-w-4xl">
+    
+    <div class="main-container">
         <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Калькулятор електропостачання</h1>
 
         <!-- Navigation -->
         <div class="flex justify-center space-x-4 mb-6">
-            <button class="nav-item px-6 py-3 text-lg font-medium" onclick="switchPanel(this, 'system-reliability')">Надійність систем</button>
-            <button class="nav-item px-6 py-3 text-lg font-medium" onclick="switchPanel(this, 'power-losses')">Збитки</button>
+            <button class="nav-item" onclick="switchPanel(this, 'system-reliability')">Надійність систем</button>
+            <button class="nav-item" onclick="switchPanel(this, 'power-losses')">Збитки</button>
         </div>
 
         <!-- System Reliability Panel -->
         <div id="system-reliability" class="panel">
             <h2 class="text-2xl font-semibold mb-6 text-gray-700">Аналіз надійності систем</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Інтенсивність відмов -->
                 <div>
-                    <label for="switch110-failure" class="block text-sm font-medium text-gray-600">Вимикач 110 кВ (1/рік):</label>
-                    <input type="number" id="switch110-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.01">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700 text-center">Параметри інтенсивності відмов (1/рік)</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="switch110-failure" class="block text-sm font-medium text-gray-600">Вимикач 110 кВ:</label>
+                            <input type="number" id="switch110-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.01">
+                        </div>
+                        <div>
+                            <label for="line110-failure" class="block text-sm font-medium text-gray-600">ЛЕП 110 кВ:</label>
+                            <input type="number" id="line110-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.07">
+                        </div>
+                        <div>
+                            <label for="trans-failure" class="block text-sm font-medium text-gray-600">Трансформатор:</label>
+                            <input type="number" id="trans-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.015">
+                        </div>
+                        <div>
+                            <label for="switch10-failure" class="block text-sm font-medium text-gray-600">Вимикач 10 кВ:</label>
+                            <input type="number" id="switch10-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.02">
+                        </div>
+                        <div>
+                            <label for="conn-failure" class="block text-sm font-medium text-gray-600">З'єднання:</label>
+                            <input type="number" id="conn-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.03">
+                        </div>
+                        <div>
+                            <label for="conn-count" class="block text-sm font-medium text-gray-600">Кількість з'єднань:</label>
+                            <input type="number" id="conn-count" class="w-full p-3 border rounded-lg" placeholder="6">
+                        </div>
+                        <div>
+                            <label for="section-switch-failure" class="block text-sm font-medium text-gray-600">Секційний вимикач:</label>
+                            <input type="number" id="section-switch-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.002">
+                        </div>
+                    </div>
                 </div>
+                <!-- Час відновлення -->
                 <div>
-                    <label for="line110-failure" class="block text-sm font-medium text-gray-600">ЛЕП 110 кВ (1/рік):</label>
-                    <input type="number" id="line110-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.07">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700 text-center">Час відновлення (год)</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="switch110-recovery" class="block text-sm font-medium text-gray-600">Вимикач 110 кВ:</label>
+                            <input type="number" id="switch110-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="30">
+                        </div>
+                        <div>
+                            <label for="line110-recovery" class="block text-sm font-medium text-gray-600">ЛЕП 110 кВ:</label>
+                            <input type="number" id="line110-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="0.07">
+                        </div>
+                        <div>
+                            <label for="trans-recovery" class="block text-sm font-medium text-gray-600">Трансформатор:</label>
+                            <input type="number" id="trans-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="100">
+                        </div>
+                        <div>
+                            <label for="switch10-recovery" class="block text-sm font-medium text-gray-600">Вимикач 10 кВ:</label>
+                            <input type="number" id="switch10-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="0.02">
+                        </div>
+                        <div>
+                            <label for="conn-recovery" class="block text-sm font-medium text-gray-600">З'єднання:</label>
+                            <input type="number" id="conn-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="1.8">
+                        </div>
+                    </div>
                 </div>
+                <!-- Плановий простій -->
                 <div>
-                    <label for="trans-failure" class="block text-sm font-medium text-gray-600">Трансформатор (1/рік):</label>
-                    <input type="number" id="trans-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.015">
-                </div>
-                <div>
-                    <label for="switch10-failure" class="block text-sm font-medium text-gray-600">Вимикач 10 кВ (1/рік):</label>
-                    <input type="number" id="switch10-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.02">
-                </div>
-                <div>
-                    <label for="conn-failure" class="block text-sm font-medium text-gray-600">З'єднання (1/рік):</label>
-                    <input type="number" id="conn-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.03">
-                </div>
-                <div>
-                    <label for="conn-count" class="block text-sm font-medium text-gray-600">Кількість з'єднань:</label>
-                    <input type="number" id="conn-count" class="w-full p-3 border rounded-lg" placeholder="6">
-                </div>
-                <div>
-                    <label for="switch110-recovery" class="block text-sm font-medium text-gray-600">Відновлення вимикача 110 кВ (год):</label>
-                    <input type="number" id="switch110-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="30">
-                </div>
-                <div>
-                    <label for="line110-recovery" class="block text-sm font-medium text-gray-600">Відновлення ЛЕП 110 кВ (год):</label>
-                    <input type="number" id="line110-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="0.07">
-                </div>
-                <div>
-                    <label for="trans-recovery" class="block text-sm font-medium text-gray-600">Відновлення трансформатора (год):</label>
-                    <input type="number" id="trans-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="100">
-                </div>
-                <div>
-                    <label for="switch10-recovery" class="block text-sm font-medium text-gray-600">Відновлення вимикача 10 кВ (год):</label>
-                    <input type="number" id="switch10-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="0.02">
-                </div>
-                <div>
-                    <label for="conn-recovery" class="block text-sm font-medium text-gray-600">Відновлення з'єднань (год):</label>
-                    <input type="number" id="conn-recovery" step="any" class="w-full p-3 border rounded-lg" placeholder="1.8">
-                </div>
-                <div>
-                    <label for="planned-downtime" class="block text-sm font-medium text-gray-600">Плановий простій (год):</label>
-                    <input type="number" id="planned-downtime" step="any" class="w-full p-3 border rounded-lg" placeholder="43">
-                </div>
-                <div>
-                    <label for="section-switch-failure" class="block text-sm font-medium text-gray-600">Секційний вимикач (1/рік):</label>
-                    <input type="number" id="section-switch-failure" step="any" class="w-full p-3 border rounded-lg" placeholder="0.002">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700 text-center">Плановий простій (год/рік)</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="planned-downtime" class="block text-sm font-medium text-gray-600">Плановий простій:</label>
+                            <input type="number" id="planned-downtime" step="any" class="w-full p-3 border rounded-lg" placeholder="43">
+                        </div>
+                    </div>
                 </div>
             </div>
-            <button onclick="computeReliability()" class="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">Обчислити</button>
+            <button onclick="computeReliability()" class="btn">Обчислити</button>
 
             <div id="reliability-output" class="mt-6 hidden">
                 <h3 class="text-lg font-semibold text-gray-700">Результати:</h3>
-                <p>ω_одноколова: <span id="single-loop-rate" class="font-bold"></span> 1/рік</p>
-                <p>ω_двоколова: <span id="dual-loop-rate" class="font-bold"></span> 1/рік</p>
-                <p>t_одноколова: <span id="single-loop-time" class="font-bold"></span> год</p>
-                <p>t_двоколова: <span id="dual-loop-time" class="font-bold"></span> год</p>
-                <p>k_авар_одноколова: <span id="single-emergency-coef" class="font-bold"></span></p>
-                <p>k_авар_двоколова: <span id="dual-emergency-coef" class="font-bold"></span></p>
-                <p>k_план_одноколова: <span id="single-planned-coef" class="font-bold"></span></p>
-                <p>k_план_двоколова: <span id="dual-planned-coef" class="font-bold"></span></p>
+                <table class="table-auto w-full mt-4 border-collapse border border-gray-400">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border border-gray-400 p-3">Параметр</th>
+                            <th class="border border-gray-400 p-3">Одноколова система</th>
+                            <th class="border border-gray-400 p-3">Двоколова система</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-gray-400 p-3">ω (1/рік)</td>
+                            <td class="border border-gray-400 p-3" id="single-loop-rate"></td>
+                            <td class="border border-gray-400 p-3" id="dual-loop-rate"></td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-400 p-3">t (год)</td>
+                            <td class="border border-gray-400 p-3" id="single-loop-time"></td>
+                            <td class="border border-gray-400 p-3" id="dual-loop-time"></td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-400 p-3">k_авар</td>
+                            <td class="border border-gray-400 p-3" id="single-emergency-coef"></td>
+                            <td class="border border-gray-400 p-3" id="dual-emergency-coef"></td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-400 p-3">k_план</td>
+                            <td class="border border-gray-400 p-3" id="single-planned-coef"></td>
+                            <td class="border border-gray-400 p-3" id="dual-planned-coef"></td>
+                        </tr>
+                    </tbody>
+                </table>
                 <p id="system-conclusion" class="mt-3"></p>
             </div>
         </div>
@@ -128,7 +324,7 @@
                     <input type="number" id="planned-cost-rate" step="any" class="w-full p-3 border rounded-lg" placeholder="17.6">
                 </div>
             </div>
-            <button onclick="computeLosses()" class="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">Обчислити</button>
+            <button onclick="computeLosses()" class="btn">Обчислити</button>
 
             <div id="losses-output" class="mt-6 hidden">
                 <h3 class="text-lg font-semibold text-gray-700">Результати:</h3>

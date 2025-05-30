@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор електричних навантажень</title>
+    <style>
+        body {
+            background-color: #e5e7eb;
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        .container {
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px 0 rgba(0,0,0,0.1);
+            padding: 32px;
+            width: 100%;
+            max-width: 1500px;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 32px;
+            color: #1f2937;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #374151;
+            border-left: 5px solid #2563eb;
+            padding-left: 10px;
+        }
+        h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #374151;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            margin-top: 16px;
+            border-collapse: collapse;
+            border: 1px solid #9ca3af;
+            background: #fff;
+        }
+        th, td {
+            border: 1px solid #9ca3af;
+            padding: 12px;
+            text-align: center;
+        }
+        thead tr {
+            background-color: #f3f4f6;
+        }
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        button {
+            background-color: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin: 10px 0;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .results-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+        .results-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: #f3f4f6;
+            padding: 20px;
+            border-radius: 1rem;
+            border-left: 5px solid #2563eb;
+            margin-bottom: 16px;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #d1d5db;
+        }
+        .result-value {
+            font-weight: bold;
+            color: #1f2937;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        .workshop-data {
+            background-color: #f3f4f6;
+            padding: 20px;
+            border-radius: 1rem;
+            margin: 20px 0;
+        }
+        .workshop-data input {
+            margin-bottom: 10px;
+        }
+        .workshop-data label {
+            display: inline-block;
+            width: 170px;
+            color: #374151;
+            font-weight: 500;
+        }
+        .variant-selector {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f3f4f6;
+            border-radius: 1rem;
+            border-left: 5px solid #2563eb;
+        }
+        .variant-selector h3 {
+            margin-top: 0;
+            color: #374151;
+        }
+        .variant-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .variant-row label {
+            margin-right: 10px;
+            min-width: 250px;
+            color: #374151;
+            font-weight: 500;
+        }
+        .variant-presets {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        @media (max-width: 900px) {
+            .results-container {
+                flex-direction: column;
+            }
+            .results-section {
+                min-width: unset;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Калькулятор електричних навантажень</h1>
+        
+        <div class="variant-selector">
+            <h3>Вибір варіанту розрахунку</h3>
+            <div class="variant-row">
+                <label for="grinding-power">Номінальна потужність шліфувального верстата (кВт):</label>
+                <input type="number" id="grinding-power" value="20" step="0.1" min="0">
+            </div>
+            <div class="variant-row">
+                <label for="polishing-k">Коефіцієнт використання полірувального верстата:</label>
+                <input type="number" id="polishing-k" value="0.2" step="0.01" min="0" max="1">
+            </div>
+            <div class="variant-row">
+                <label for="circular-tg">Коефіцієнт реактивної потужності циркулярної пили (tgφ):</label>
+                <input type="number" id="circular-tg" value="1.52" step="0.01" min="0">
+            </div>
+            <div class="variant-presets">
+                <button onclick="loadVariant1()">Контрольний приклад</button>
+                <button onclick="loadVariant2()">Варіант 9 (28, 0.29, 1.64)</button>
+                <button onclick="loadCustomVariant()">Застосувати поточні значення</button>
+            </div>
+        </div>
+        
+        <h2>Вхідні дані електрообладнання</h2>
+        <div class="table-container">
+            <table id="input-table">
+                <thead>
+                    <tr>
+                        <th>Назва верстата</th>
+                        <th>n</th>
+                        <th>p, кВт</th>
+                        <th>η</th>
+                        <th>cosφ</th>
+                        <th>n*p, кВт</th>
+                        <th>Ip, А</th>
+                        <th>k</th>
+                        <th>tgφ</th>
+                        <th>n*p*k, кВт</th>
+                        <th>n*p*k*tgφ, кВАр</th>
+                        <th>n*p², кВт²</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Всього</th>
+                        <th id="total-n">0</th>
+                        <th>-</th>
+                        <th>-</th>
+                        <th>-</th>
+                        <th id="total-np">0</th>
+                        <th id="total-ip">0</th>
+                        <th>-</th>
+                        <th>-</th>
+                        <th id="total-npk">0</th>
+                        <th id="total-npktg">0</th>
+                        <th id="total-np2">0</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <button id="calculate-btn" onclick="calculateAll()">Перерахувати</button>
+        
+        <h2>Дані цеху</h2>
+        <div class="workshop-data">
+            <div>
+                <label for="workshop-kp">Сума Kp:</label>
+                <input type="number" id="workshop-kp" value="752" step="0.1">
+            </div>
+            <div>
+                <label for="workshop-p">Сума P:</label>
+                <input type="number" id="workshop-p" value="2330" step="0.1">
+            </div>
+            <div>
+                <label for="workshop-np">Сума N*P:</label>
+                <input type="number" id="workshop-np" value="2330" step="0.1">
+            </div>
+            <div>
+                <label for="workshop-np2">Сума N*P²:</label>
+                <input type="number" id="workshop-np2" value="96388" step="0.1">
+            </div>
+            <div>
+                <label for="workshop-npktg">Сума N*P*K*tgφ:</label>
+                <input type="number" id="workshop-npktg" value="657" step="0.1">
+            </div>
+            <button onclick="updateWorkshopData()">Оновити дані цеху</button>
+        </div>
+        
+        <h2>Результати розрахунків</h2>
+        <div class="results-container">
+            <div class="results-section">
+                <h3>Розрахунки для ШР1</h3>
+                <div class="result-row">
+                    <span>Коефіцієнт використання (Kв):</span>
+                    <span class="result-value" id="kv-result">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Ефективне число електроприймачів (ne):</span>
+                    <span class="result-value" id="ne-result">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Округлене ne:</span>
+                    <span class="result-value" id="ne-rounded">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Коефіцієнт попиту (Kп):</span>
+                    <span class="result-value" id="kp-result">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Активна потужність (Pр), кВт:</span>
+                    <span class="result-value" id="pp-result">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Реактивна потужність (Qр), кВАр:</span>
+                    <span class="result-value" id="qp-result">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Повна потужність (Sр), кВА:</span>
+                    <span class="result-value" id="sp-result">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Розрахунковий струм (Iр), А:</span>
+                    <span class="result-value" id="ip-result">0</span>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <h3>Розрахунки для цеху</h3>
+                <div class="result-row">
+                    <span>Коефіцієнт використання (Kв):</span>
+                    <span class="result-value" id="kv-workshop">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Ефективне число електроприймачів (ne):</span>
+                    <span class="result-value" id="ne-workshop">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Округлене ne:</span>
+                    <span class="result-value" id="ne-workshop-rounded">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Коефіцієнт попиту (Kп):</span>
+                    <span class="result-value" id="kp-workshop">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Активна потужність (Pр), кВт:</span>
+                    <span class="result-value" id="pp-workshop">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Реактивна потужність (Qр), кВАр:</span>
+                    <span class="result-value" id="qp-workshop">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Повна потужність (Sр), кВА:</span>
+                    <span class="result-value" id="sp-workshop">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Розрахунковий струм (Iр), А:</span>
+                    <span class="result-value" id="ip-workshop">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const VARIANT_1 = [
+        { name: "Токарний верстат (1-4)", n: 4, p: 10, eta: 0.89, cosphi: 0.5, k: 0.14, tgphi: 1.73 },
+        { name: "Фрезерний верстат (5-8)", n: 4, p: 7, eta: 0.89, cosphi: 0.6, k: 0.14, tgphi: 1.33 },
+        { name: "Свердлильний верстат (9-13)", n: 5, p: 4.5, eta: 0.89, cosphi: 0.6, k: 0.14, tgphi: 1.33 },
+        { name: "Шліфувальний верстат (14-16)", n: 3, p: 12, eta: 0.89, cosphi: 0.6, k: 0.14, tgphi: 1.33 },
+        { name: "Електропіч (17-18)", n: 2, p: 30, eta: 0.95, cosphi: 0.8, k: 0.75, tgphi: 0.75 }
+    ];
+
+    const BASE_DATA = [
+        { name: "Шліфувальний верстат (1-4)", n: 4, p: 20, eta: 0.92, cosphi: 0.9, k: 0.15, tgphi: 1.33 },
+        { name: "Свердлильний верстат (5-6)", n: 2, p: 14, eta: 0.92, cosphi: 0.9, k: 0.12, tgphi: 1 },
+        { name: "Фугувальний верстат (9-12)", n: 4, p: 42, eta: 0.92, cosphi: 0.9, k: 0.15, tgphi: 1.33 },
+        { name: "Циркулярна пила (13)", n: 1, p: 36, eta: 0.92, cosphi: 0.9, k: 0.3, tgphi: 1.52 },
+        { name: "Прес (16)", n: 1, p: 20, eta: 0.92, cosphi: 0.9, k: 0.5, tgphi: 0.75 },
+        { name: "Полірувальний верстат (24)", n: 1, p: 40, eta: 0.92, cosphi: 0.9, k: 0.2, tgphi: 1 },
+        { name: "Фрезерний верстат (26-27)", n: 2, p: 32, eta: 0.92, cosphi: 0.9, k: 0.2, tgphi: 1 },
+        { name: "Вентилятор (36)", n: 1, p: 20, eta: 0.92, cosphi: 0.9, k: 0.65, tgphi: 0.75 }
+    ];
+
+    let machines = [];
+    let workshop = {
+        sumKp: 752,
+        sumP: 2330,
+        sumNP: 2330,
+        sumNP2: 96388,
+        sumNPktg: 657
+    };
+
+    function setVariant1() {
+        machines = VARIANT_1.map(obj => ({...obj}));
+        renderTable();
+        fillResults({
+            kv: 0.2086, ne: 15, kp: 1.25, pp: 118.95, qp: 107.302, sp: 160.1962, ip: 313.02,
+            kvW: 0.32, neW: 56, kpW: 0.7, ppW: 526.4, qpW: 459.9, spW: 699, ipW: 1385.263
+        });
+    }
+
+    function setVariant2() {
+        machines = BASE_DATA.map(obj => ({...obj}));
+        machines[0].p = 28;
+        machines[5].k = 0.29;
+        machines[3].tgphi = 1.64;
+        document.getElementById('grinding-power').value = 28;
+        document.getElementById('polishing-k').value = 0.29;
+        document.getElementById('circular-tg').value = 1.64;
+        renderTable();
+        calculate();
+    }
+
+    function setCustomVariant() {
+        machines = BASE_DATA.map(obj => ({...obj}));
+        machines[0].p = parseFloat(document.getElementById('grinding-power').value) || 20;
+        machines[5].k = parseFloat(document.getElementById('polishing-k').value) || 0.2;
+        machines[3].tgphi = parseFloat(document.getElementById('circular-tg').value) || 1.52;
+        renderTable();
+        calculate();
+    }
+
+    function renderTable() {
+        const tbody = document.querySelector('#input-table tbody');
+        tbody.innerHTML = '';
+        machines.forEach((item, idx) => {
+            const np = item.n * item.p;
+            const ip = np * 1000 / (Math.sqrt(3) * 380 * item.cosphi * item.eta);
+            const npk = np * item.k;
+            const npktg = npk * item.tgphi;
+            const np2 = item.n * Math.pow(item.p, 2);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.name}</td>
+                <td><input type="number" value="${item.n}" step="1" min="0" data-idx="${idx}" data-key="n"></td>
+                <td><input type="number" value="${item.p}" step="0.1" min="0" data-idx="${idx}" data-key="p"></td>
+                <td><input type="number" value="${item.eta}" step="0.01" min="0" max="1" data-idx="${idx}" data-key="eta"></td>
+                <td><input type="number" value="${item.cosphi}" step="0.01" min="0" max="1" data-idx="${idx}" data-key="cosphi"></td>
+                <td class="np">${np.toFixed(2)}</td>
+                <td class="ip">${ip.toFixed(2)}</td>
+                <td><input type="number" value="${item.k}" step="0.01" min="0" max="1" data-idx="${idx}" data-key="k"></td>
+                <td><input type="number" value="${item.tgphi}" step="0.01" min="0" data-idx="${idx}" data-key="tgphi"></td>
+                <td class="npk">${npk.toFixed(2)}</td>
+                <td class="npktg">${npktg.toFixed(2)}</td>
+                <td class="np2">${np2.toFixed(2)}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        tbody.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', onTableInput);
+        });
+    }
+
+    function onTableInput(e) {
+        const idx = +e.target.dataset.idx;
+        const key = e.target.dataset.key;
+        machines[idx][key] = parseFloat(e.target.value) || 0;
+        renderTable();
+        calculate();
+    }
+
+    function updateWorkshop() {
+        workshop.sumKp = parseFloat(document.getElementById('workshop-kp').value) || 0;
+        workshop.sumP = parseFloat(document.getElementById('workshop-p').value) || 0;
+        workshop.sumNP = parseFloat(document.getElementById('workshop-np').value) || 0;
+        workshop.sumNP2 = parseFloat(document.getElementById('workshop-np2').value) || 0;
+        workshop.sumNPktg = parseFloat(document.getElementById('workshop-npktg').value) || 0;
+        calculate();
+    }
+
+    function calculate() {
+        let sumN = 0, sumNP = 0, sumIP = 0, sumNPK = 0, sumNPKtg = 0, sumNP2 = 0;
+        machines.forEach(item => {
+            const np = item.n * item.p;
+            const ip = np * 1000 / (Math.sqrt(3) * 380 * item.cosphi * item.eta);
+            const npk = np * item.k;
+            const npktg = npk * item.tgphi;
+            const np2 = item.n * Math.pow(item.p, 2);
+            sumN += item.n;
+            sumNP += np;
+            sumIP += ip;
+            sumNPK += npk;
+            sumNPKtg += npktg;
+            sumNP2 += np2;
+        });
+
+        document.getElementById('total-n').textContent = sumN;
+        document.getElementById('total-np').textContent = sumNP.toFixed(2);
+        document.getElementById('total-ip').textContent = sumIP.toFixed(2);
+        document.getElementById('total-npk').textContent = sumNPK.toFixed(2);
+        document.getElementById('total-npktg').textContent = sumNPKtg.toFixed(2);
+        document.getElementById('total-np2').textContent = sumNP2.toFixed(2);
+
+        const kv = sumNPK / sumNP;
+        const ne = Math.pow(sumNP, 2) / sumNP2;
+        const neRound = Math.round(ne);
+        const kp = neRound <= 10 ? 1.5 : 1.25;
+        const pp = kp * sumNPK;
+        const qp = sumNPKtg;
+        const sp = Math.sqrt(pp * pp + qp * qp);
+        const ip = sp * 1000 / (Math.sqrt(3) * 380);
+
+        fillResults({
+            kv, ne, neRound, kp, pp, qp, sp, ip,
+            kvW: workshop.sumKp / workshop.sumP,
+            neW: Math.pow(workshop.sumNP, 2) / workshop.sumNP2,
+            neWround: Math.round(Math.pow(workshop.sumNP, 2) / workshop.sumNP2)
+        });
+    }
+
+    function fillResults(res) {
+        document.getElementById('kv-result').textContent = (res.kv ?? 0).toFixed(4);
+        document.getElementById('ne-result').textContent = (res.ne ?? 0).toFixed(3);
+        document.getElementById('ne-rounded').textContent = res.neRound ?? 0;
+        document.getElementById('kp-result').textContent = (res.kp ?? 0).toFixed(2);
+        document.getElementById('pp-result').textContent = (res.pp ?? 0).toFixed(2);
+        document.getElementById('qp-result').textContent = (res.qp ?? 0).toFixed(2);
+        document.getElementById('sp-result').textContent = (res.sp ?? 0).toFixed(4);
+        document.getElementById('ip-result').textContent = (res.ip ?? 0).toFixed(2);
+
+        // Для цеху
+        const kvW = res.kvW ?? 0;
+        const neW = res.neW ?? 0;
+        const neWround = res.neWround ?? 0;
+        let kpW = 1.0;
+        if (neWround > 50) kpW = 0.7;
+        else if (neWround > 30) kpW = 0.8;
+        else if (neWround > 10) kpW = 0.9;
+
+        const ppW = kpW * workshop.sumKp;
+        const qpW = workshop.sumNPktg;
+        const spW = Math.sqrt(ppW * ppW + qpW * qpW);
+        const ipW = spW * 1000 / (Math.sqrt(3) * 380);
+
+        document.getElementById('kv-workshop').textContent = kvW.toFixed(4);
+        document.getElementById('ne-workshop').textContent = neW.toFixed(2);
+        document.getElementById('ne-workshop-rounded').textContent = neWround;
+        document.getElementById('kp-workshop').textContent = kpW.toFixed(2);
+        document.getElementById('pp-workshop').textContent = ppW.toFixed(2);
+        document.getElementById('qp-workshop').textContent = qpW.toFixed(2);
+        document.getElementById('sp-workshop').textContent = spW.toFixed(2);
+        document.getElementById('ip-workshop').textContent = ipW.toFixed(2);
+    }
+
+    window.onload = function() {
+        machines = BASE_DATA.map(obj => ({...obj}));
+        renderTable();
+        calculate();
+        document.getElementById('calculate-btn').onclick = calculate;
+        document.querySelectorAll('.variant-presets button')[0].onclick = setVariant1;
+        document.querySelectorAll('.variant-presets button')[1].onclick = setVariant2;
+        document.querySelectorAll('.variant-presets button')[2].onclick = setCustomVariant;
+        document.querySelector('.workshop-data button').onclick = updateWorkshop;
+    };
+</script>
+</body>
+</html>
